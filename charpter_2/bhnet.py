@@ -37,6 +37,7 @@ def usage():
     sys.exit()
 
 
+# ################ 客户端 ##################
 def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -71,6 +72,7 @@ def client_sender(buffer):
         client.close()
 
 
+# ################### 服务器端 ########################
 def run_command(command):
 
     # 删除多余空格
