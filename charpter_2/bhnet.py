@@ -56,7 +56,7 @@ def client_sender(buffer):
                 if recv_len < 4096:
                     break
 
-            print response
+            print response,
 
             # 等待更多输入
             buffer = raw_input("")
@@ -173,37 +173,37 @@ def main():
     if not len(sys.argv[1:]):
         usage()
 
-        # 读取命令选项
-        try:
-            opts, args = getopt.getopt(sys.args[1:], "hle:t:p:cu:",
-                                       ["help", "listen", "execute", "target",
-                                        "port", "command", "upload"])
-            # getopt.getopt()解释：
-            # param1：sys.args[1:] 除去脚本名外的参数列表
-            # param2："hle:t:p:cu:"
-            # 短格式 --- h,l,c 后面没有冒号：表示后面不带参数;e,t,p,u后面有冒号表示后面需要参数
-            # param3:["...","...",...] 长格式
-        except getopt.GetoptError as err:
-            print str(err)
-            usage()
+    # 读取命令选项
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:",
+                                   ["help", "listen", "execute", "target",
+                                    "port", "command", "upload"])
+        # getopt.getopt()解释：
+        # param1：sys.args[1:] 除去脚本名外的参数列表
+        # param2："hle:t:p:cu:"
+        # 短格式 --- h,l,c 后面没有冒号：表示后面不带参数;e,t,p,u后面有冒号表示后面需要参数
+        # param3:["...","...",...] 长格式
+    except getopt.GetoptError as err:
+        print str(err)
+        usage()
 
-        for o, a in opts:
-            if o in ("-h", "--help"):
-                usage()
-            elif o in ("-l", "--listen"):
-                listen = True
-            elif o in ("-e", "--execute"):
-                execute = a
-            elif o in ("-c", "--commandshell"):
-                command = True
-            elif o in ("-u", "--upload"):
-                upload_destination = a
-            elif o in ("-t", "--target"):
-                target = a
-            elif o in ("-p", "--port"):
-                port = int(a)
-            else:
-                assert False, "Unhandled option"
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage()
+        elif o in ("-l", "--listen"):
+            listen = True
+        elif o in ("-e", "--execute"):
+            execute = a
+        elif o in ("-c", "--commandshell"):
+            command = True
+        elif o in ("-u", "--upload"):
+            upload_destination = a
+        elif o in ("-t", "--target"):
+            target = a
+        elif o in ("-p", "--port"):
+            port = int(a)
+        else:
+            assert False, "Unhandled option"
 
     # 监听 or 从标准输入发送数据
     if not listen and len(target) and port > 0:
