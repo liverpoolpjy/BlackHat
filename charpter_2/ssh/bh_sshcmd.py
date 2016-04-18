@@ -11,6 +11,7 @@ def ssh_command(ip, user, passwd, command):
     # 建议现实环境用ssh密钥
     # client.load_host_keys('/home/jiayi/.shh/konw_hosts')
 
+    # 允许连接不在know_hosts文件中的主机
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(ip, username=user, password=passwd)
 
@@ -20,4 +21,4 @@ def ssh_command(ip, user, passwd, command):
         print ssh_session.recv(1024)
     return
 
-ssh_command('120.26.121.101', 'root', '*', 'id')
+ssh_command('*', 'root', '*', 'ls')

@@ -9,6 +9,7 @@ import sys
 host_key = paramiko.RSAKey(filename='test_rsa.key')
 
 
+# 设置ssh服务器
 class Server(paramiko.ServerInterface):
     def __init__(self):
         self.event = threading.Event()
@@ -19,13 +20,14 @@ class Server(paramiko.ServerInterface):
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
     def check_auth_password(self, username, password):
-        if (username == '...') and (password == '...'):
+        if (username == 'root') and (password == 'password'):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
 server = sys.argv[1]
 ssh_port = int(sys.argv[2])
 
+# 建立套接字监听
 try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -36,4 +38,39 @@ try:
 except Exception, e:
     print '[-] Listen failed: ' + str(e)
     sys.exit(1)
-print '[+] Got a connection'
+print '[+] Got a connection!'
+
+try:
+    bhSession = paramiko.Transport(client)    # 将套接字转化为ssh会话
+    bhSession.add_server_key(host_key)        # 添加密钥
+    server = Server()
+    try:
+        bhSession.start_server(server=server)    # 验证
+    except paramiko.SSHException, x:
+        print '[-] SSH negotiation failed.'
+
+    chan = bhSession.accept(20)
+    print '[+] Autheticated!'
+    print chan.recv(1024)
+    chan.send('Welcome to bh_ssh')
+    while True:
+        try:
+            command = raw_input("Enter command: ").strip('\n')
+            if command != 'exit':
+                chan.send(command)
+                print chan.recv(1024) + '\n'
+            else:
+                chan.send('exit')
+                print 'exiting'
+                bhSession.close()
+                raise Exception('exit')
+        except KeyboardInterrupt:
+            bhSession.close()
+except Exception, e:
+    print '[-] Caught exception: ' + str(e)
+    try:
+        bhSession.close()
+    except:
+        pass
+    sys.exit(1)
+

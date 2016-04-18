@@ -16,7 +16,7 @@ def ssh_command(ip, user, passwd, command):
 
     ssh_session = client.get_transport().open_session()
     if ssh_session.active:
-        ssh_session.exec_command(command)
+        ssh_session.send(command)
         print ssh_session.recv(1024)
         while True:
             command = ssh_session.recv(1024)  # 从ssh服务器接收命令
@@ -28,4 +28,4 @@ def ssh_command(ip, user, passwd, command):
         client.close()
     return
 
-ssh_command('120.26.121.101', 'root', '*', 'ClientConnected')
+ssh_command('127.0.0.1', 'root', 'password', 'ClientConnected')
