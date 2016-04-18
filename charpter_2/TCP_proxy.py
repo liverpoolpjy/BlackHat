@@ -92,7 +92,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
 
         if len(remote_buffer):
 
-            print "[<==] Received % bytes from remote." % len(remote_buffer)
+            print "[<==] Received %d bytes from remote." % len(remote_buffer)
             hexdump(remote_buffer)
 
             # 发送到响应处理函数
