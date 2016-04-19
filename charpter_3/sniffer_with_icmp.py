@@ -6,6 +6,7 @@ import struct
 from ctypes import *
 
 host = socket.gethostbyname(socket.gethostname())
+# host = '192.168.1.109'
 print host
 
 is_windows = False
