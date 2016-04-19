@@ -3,8 +3,8 @@
 import os
 import socket
 
-# host = "192.168.0.109"
-host = socket.gethostbyname(socket.gethostname())
+host = "192.168.1.109"
+# host = socket.gethostbyname(socket.gethostname())
 is_windows = False
 if os.name == "nt":
     is_windows = True
@@ -21,7 +21,7 @@ sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 
 # 绑定到公共端口
 sniffer.bind((host, 0))
-
+print 'binded!'
 # 包含IP头部
 sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
