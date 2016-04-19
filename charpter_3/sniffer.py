@@ -3,8 +3,9 @@
 import os
 import socket
 
-host = "192.168.1.109"
-# host = socket.gethostbyname(socket.gethostname())
+# host = "192.168.1.109"
+host = socket.gethostbyname(socket.gethostname())
+print host
 is_windows = False
 if os.name == "nt":
     is_windows = True
@@ -21,11 +22,16 @@ sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 
 # 绑定到公共端口
 sniffer.bind((host, 0))
+
+# sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
+# sniffer.bind((host, 0))
+
 print 'binded!'
 # 包含IP头部
 sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
 # windows平台上，设置IOCTL启用混杂模式
+# 这里有坑！挂着vpn就要报错"socket.error: [Errno 10045]"
 if is_windows:
     sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 
