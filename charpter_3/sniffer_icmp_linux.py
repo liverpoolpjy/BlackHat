@@ -48,7 +48,7 @@ class IP(Structure):
         try:
             self.protocol = self.protocol_map[self.protocol_num]
         except:
-            self.protocol = self.protocol_map[self.protocol_num]
+            self.protocol = str(self.protocol_num)
 
 
 class ICMP(Structure):

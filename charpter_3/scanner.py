@@ -7,9 +7,14 @@ from ctypes import *
 import threading
 import time
 from netaddr import IPNetwork, IPAddress
+from get_ip import get_lan_ip
 
-host = socket.gethostbyname(socket.gethostname())
+# host = socket.gethostbyname(socket.gethostname())
+host = get_lan_ip()
+print "shut down windows firewall!"
 print "local ip is %s" % host
+print "-----------------"
+
 
 subnet = "192.168.1.0/24"
 
@@ -65,7 +70,7 @@ class IP(Structure):
         try:
             self.protocol = self.protocol_map[self.protocol_num]
         except:
-            self.protocol = self.protocol_map[self.protocol_num]
+            self.protocol = str(self.protocol_num)
 
 
 class ICMP(Structure):
@@ -106,13 +111,10 @@ t.start()
 try:
     while True:
         # 读取数据包
-        raw_buffer = sniffer.recvfrom(65565)[0]
+        raw_buffer = sniffer.recvfrom(65535)[0]
 
         # 将缓冲区前20字节按IP头进行解析
         ip_header = IP(raw_buffer[0:20])
-
-        # # 输出协议和通信双方IP地址
-        # print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
 
         if ip_header.protocol == "ICMP":
             offset = ip_header.ihl * 4     # ihl是头长度，报头长度为该字段*4字节

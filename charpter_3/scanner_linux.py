@@ -67,7 +67,7 @@ class IP(Structure):
         try:
             self.protocol = self.protocol_map[self.protocol_num]
         except:
-            self.protocol = self.protocol_map[self.protocol_num]
+            self.protocol = str(self.protocol_num)
 
 
 class ICMP(Structure):
@@ -108,7 +108,7 @@ t.start()
 try:
     while True:
         # 读取数据包
-        raw_buffer = sniffer.recvfrom(65565)[0]
+        raw_buffer = sniffer.recvfrom(65535)[0]
 
         # 将缓冲区前20字节按IP头进行解析
         ip_header = IP(raw_buffer[0:20])
