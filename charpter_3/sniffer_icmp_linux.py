@@ -28,8 +28,8 @@ class IP(Structure):
         ("ttl",        c_ubyte),
         ("protocol_num", c_ubyte),
         ("sum",        c_ushort),
-        ("src",        c_ulong),
-        ("dst",        c_ulong),
+        ("src",        c_uint32),
+        ("dst",        c_uint32),
     ]
 
     def __new__(self, socket_buffer=None):
@@ -41,8 +41,8 @@ class IP(Structure):
 
         # 可读性更强的ip地址
         # socket.inet_ntoa 将ipv4地址转化成点分十进制地址
-        self.src_address = socket.inet_ntoa(struct.pack("<L", self.src))
-        self.dst_address = socket.inet_ntoa(struct.pack("<L", self.dst))
+        self.src_address = socket.inet_ntoa(struct.pack("@I", self.src))
+        self.dst_address = socket.inet_ntoa(struct.pack("@I", self.dst))
 
         # 协议类型
         try:
@@ -84,7 +84,7 @@ if is_windows:
 try:
     while True:
         # 读取数据包
-        raw_buffer = sniffer.recvfrom(65565)[0]
+        raw_buffer = sniffer.recvfrom(65535)[0]
 
         # 将缓冲区前20字节按IP头进行解析
         ip_header = IP(raw_buffer[0:20])

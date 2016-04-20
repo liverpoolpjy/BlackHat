@@ -4,12 +4,31 @@ import socket
 import os
 import struct
 from ctypes import *
+import threading
+import time
+from netaddr import IPNetwork, IPAddress
 from get_ip import get_lan_ip
 
 # host = socket.gethostbyname(socket.gethostname())
-# host = '192.168.1.109'
 host = get_lan_ip()
-print host
+print "local ip is %s" % host
+
+subnet = "192.168.1.0/24"
+
+# 校验字符串
+magic_message = "PYTHONRULES"
+
+
+# 批量发送UDP数据包
+def udp_sender(sub_net, message):
+    time.sleep(5)
+    sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    for ip in IPNetwork(sub_net):
+        try:
+            sender.sendto(message, ("%s" % ip, 65212))
+        except:
+            pass
 
 is_windows = False
 if os.name == "nt":
@@ -28,8 +47,8 @@ class IP(Structure):
         ("ttl",        c_ubyte),
         ("protocol_num", c_ubyte),
         ("sum",        c_ushort),
-        ("src",        c_ulong),
-        ("dst",        c_ulong),
+        ("src",        c_uint32),
+        ("dst",        c_uint32),
     ]
 
     def __new__(self, socket_buffer=None):
@@ -41,8 +60,8 @@ class IP(Structure):
 
         # 可读性更强的ip地址
         # socket.inet_ntoa 将ipv4地址转化成点分十进制地址
-        self.src_address = socket.inet_ntoa(struct.pack("<L", self.src))
-        self.dst_address = socket.inet_ntoa(struct.pack("<L", self.dst))
+        self.src_address = socket.inet_ntoa(struct.pack("@I", self.src))
+        self.dst_address = socket.inet_ntoa(struct.pack("@I", self.dst))
 
         # 协议类型
         try:
@@ -81,6 +100,11 @@ sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 if is_windows:
     sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
 
+# 发送数据包
+t = threading.Thread(target=udp_sender, args=(subnet, magic_message))
+t.start()
+
+
 try:
     while True:
         # 读取数据包
@@ -93,20 +117,24 @@ try:
         # print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
 
         if ip_header.protocol == "ICMP":
-
-            print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
-
-            # 计算ICMP包的起始位置
             offset = ip_header.ihl * 4     # ihl是头长度，报头长度为该字段*4字节
             buf = raw_buffer[offset: offset + sizeof(ICMP)]
 
             # 解析ICMP数据
             icmp_header = ICMP(buf)
 
-            print "ICMP -> type: %d Code: %d" % (icmp_header.type, icmp_header.code)
+            if icmp_header.code == 3 and icmp_header.type == 3:
+
+                # 确认相应主机在子网内
+                if IPAddress(ip_header.src_address) in IPNetwork(subnet):
+
+                    # 确认ICMP包含有校验字符串
+                    if raw_buffer[len(raw_buffer) - len(magic_message):] == magic_message:
+                        print "Host Up: %s" % ip_header.src_address
 
 
 # 处理CTRL+ C
-except KeyboardInterrupt:
+except KeyboardInterrupt, e:
     if is_windows:
         sniffer.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+    print str(e)
